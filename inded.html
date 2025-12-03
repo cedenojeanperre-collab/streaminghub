@@ -1,0 +1,904 @@
+<!DOCTYPE html> 
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>StreamingHub - Catálogo de Streaming</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: radial-gradient(circle at top, #1f2937 0, #020617 55%);
+      color: #e5e7eb;
+      min-height: 100vh;
+      padding: 18px 16px 40px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      background: linear-gradient(90deg, #22d3ee, #a855f7);
+      -webkit-background-clip: text;
+      color: transparent;
+    }
+
+    header p {
+      font-size: 14px;
+      color: #9ca3af;
+      margin-top: 4px;
+    }
+
+    .controls {
+      margin: 14px auto 18px;
+      max-width: 900px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .controls input,
+    .controls select {
+      background: #020617;
+      border: 1px solid #1f2937;
+      border-radius: 999px;
+      padding: 8px 14px;
+      color: #e5e7eb;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .controls input::placeholder {
+      color: #6b7280;
+    }
+
+    .controls input:focus,
+    .controls select:focus {
+      border-color: #6366f1;
+      box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.6);
+    }
+
+    .badge-tipo {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .badge-pantalla {
+      background: rgba(56, 189, 248, 0.15);
+      color: #7dd3fc;
+      border: 1px solid rgba(56, 189, 248, 0.4);
+    }
+
+    .badge-cuenta {
+      background: rgba(251, 191, 36, 0.15);
+      color: #facc15;
+      border: 1px solid rgba(251, 191, 36, 0.45);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .card {
+      background: rgba(15, 23, 42, 0.96);
+      border-radius: 14px;
+      padding: 16px;
+      border: 1px solid #1e293b;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: #6366f1;
+      box-shadow: 0 18px 40px rgba(88, 28, 135, 0.6);
+    }
+
+    .logo-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+    }
+
+    .logo {
+      width: 80px;
+      height: 80px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(148, 163, 184, 0.4));
+    }
+
+    .logo-fallback {
+      width: 80px;
+      height: 80px;
+      border-radius: 24px;
+      background: #020617;
+      border: 1px solid #334155;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      font-weight: 700;
+      color: #e5e7eb;
+      text-transform: uppercase;
+    }
+
+    .name {
+      font-size: 18px;
+      font-weight: 700;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .details-line {
+      font-size: 12px;
+      text-align: center;
+      color: #9ca3af;
+      margin-bottom: 6px;
+    }
+
+    .price {
+      text-align: center;
+      font-size: 18px;
+      font-weight: 700;
+      color: #22c55e;
+      margin-bottom: 4px;
+    }
+
+    .subinfo {
+      text-align: center;
+      font-size: 11px;
+      color: #6b7280;
+      margin-bottom: 8px;
+    }
+
+    .card-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn {
+      width: 100%;
+      border: none;
+      border-radius: 999px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    .btn-whatsapp {
+      background: #22c55e;
+      color: #052e16;
+      text-transform: uppercase;
+    }
+
+    .btn-whatsapp:hover {
+      background: #16a34a;
+      transform: translateY(-1px) scale(1.02);
+      box-shadow: 0 6px 18px rgba(34, 197, 94, 0.45);
+    }
+
+    .btn-info {
+      background: #111827;
+      color: #e5e7eb;
+      border: 1px solid #1f2937;
+      font-size: 12px;
+    }
+
+    .btn-info:hover {
+      background: #020617;
+      border-color: #4b5563;
+      transform: translateY(-1px);
+    }
+
+    .section-title {
+      max-width: 1100px;
+      margin: 18px auto 6px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #6b7280;
+    }
+
+    .footer {
+      max-width: 1100px;
+      margin: 24px auto 0;
+      text-align: center;
+      font-size: 11px;
+      color: #64748b;
+    }
+
+    .highlight {
+      color: #38bdf8;
+      font-weight: 600;
+    }
+
+    .no-results {
+      text-align: center;
+      margin-top: 24px;
+      color: #9ca3af;
+      font-size: 14px;
+    }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal-card {
+      position: relative;
+      background: rgba(15, 23, 42, 0.98);
+      border-radius: 16px;
+      border: 1px solid #4b5563;
+      padding: 18px 16px 16px;
+      width: 90%;
+      max-width: 370px;
+      box-shadow: 0 30px 80px rgba(0, 0, 0, 0.9);
+      animation: modal-in 0.2s ease-out;
+    }
+
+    @keyframes modal-in {
+      from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 8px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #9ca3af;
+      font-size: 18px;
+      cursor: pointer;
+    }
+
+    .modal-logo-wrapper {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 10px;
+      margin-top: 8px;
+    }
+
+    .modal-logo {
+      width: 70px;
+      height: 70px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 10px rgba(148, 163, 184, 0.4));
+    }
+
+    .modal-name {
+      text-align: center;
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+
+    .modal-type {
+      text-align: center;
+      font-size: 12px;
+      color: #a5b4fc;
+      margin-bottom: 4px;
+    }
+
+    .modal-price {
+      text-align: center;
+      font-size: 16px;
+      font-weight: 600;
+      color: #22c55e;
+      margin-bottom: 4px;
+    }
+
+    .modal-details {
+      text-align: center;
+      font-size: 12px;
+      color: #9ca3af;
+      margin-bottom: 10px;
+    }
+
+    .modal-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      color: #e5e7eb;
+    }
+
+    .modal-list {
+      list-style: disc;
+      padding-left: 18px;
+      font-size: 13px;
+      color: #cbd5f5;
+      margin-bottom: 12px;
+    }
+
+    .modal-list li + li {
+      margin-top: 2px;
+    }
+
+    .modal-wa-btn {
+      margin-top: 2px;
+    }
+
+    @media (min-width: 768px) {
+      header h1 {
+        font-size: 32px;
+      }
+      header p {
+        font-size: 15px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>StreamingHub</h1>
+    <p>Catálogo intuitivo de pantallas y cuentas completas · Solicita por WhatsApp en un solo clic</p>
+  </header>
+
+  <!-- Controles: buscador + filtro -->
+  <section class="controls">
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="Buscar plataforma (Netflix, Disney, Prime, etc.)"
+    />
+    <select id="filterTipo">
+      <option value="todos">Tipo: Pantalla y Cuenta completa</option>
+      <option value="Pantalla">Solo pantallas individuales</option>
+      <option value="Cuenta completa">Solo cuentas completas</option>
+    </select>
+  </section>
+
+  <div class="section-title">Resultados del catálogo</div>
+
+  <!-- Catálogo -->
+  <main>
+    <section id="catalogo" class="grid"></section>
+    <div id="noResults" class="no-results" style="display:none;">
+      No se encontraron plataformas con esos filtros.
+    </div>
+  </main>
+
+  <div class="footer">
+    Desarrollado por <span class="highlight">Jean</span> · Proyecto MVP de Ingeniería en Software 🚀
+  </div>
+
+  <!-- MODAL DE CONTENIDO -->
+  <div id="modalOverlay" class="modal-overlay">
+    <div class="modal-card">
+      <button id="modalClose" class="modal-close">✕</button>
+      <div class="modal-logo-wrapper">
+        <img id="modalLogo" class="modal-logo" src="" alt="Logo plataforma" />
+      </div>
+      <h2 id="modalName" class="modal-name"></h2>
+      <p id="modalType" class="modal-type"></p>
+      <p id="modalPrice" class="modal-price"></p>
+      <p id="modalDetails" class="modal-details"></p>
+      <p class="modal-subtitle">Contenido destacado que podrás disfrutar:</p>
+      <ul id="modalList" class="modal-list"></ul>
+      <button id="modalWA" class="btn btn-whatsapp modal-wa-btn">
+        <span>📲</span>
+        <span>Solicitar por WhatsApp</span>
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // 👇 CAMBIA ESTE NÚMERO POR TU WHATSAPP (formato internacional sin +)
+    const WHATSAPP_NUMBER = "593967700003"; // ejemplo: 59309XXXXXXXX
+
+    // 📦 Datos de plataformas (pantallas + cuentas completas)
+    const plataformas = [
+      // PANTALLAS (1 usuario)
+      {
+        nombre: "Netflix",
+        tipo: "Pantalla",
+        precio: 4.50,
+        duracion: "1 mes",
+        detalles: "Uso individual (1 pantalla)",
+        perfiles: "1 usuario",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+        contenidoDestacado: [
+          "Stranger Things",
+          "El juego del calamar",
+          "Wednesday",
+          "La casa de papel"
+        ]
+      },
+      {
+        nombre: "Disney+ Premium",
+        tipo: "Pantalla",
+        precio: 4.10,
+        duracion: "1 mes",
+        detalles: "Pantalla premium",
+        perfiles: "1 usuario",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg",
+        contenidoDestacado: [
+          "The Mandalorian",
+          "Loki",
+          "Películas de Marvel",
+          "Clásicos Disney y Pixar"
+        ]
+      },
+      {
+        nombre: "Amazon Prime Video",
+        tipo: "Pantalla",
+        precio: 3.50,
+        duracion: "1 mes",
+        detalles: "Pantalla individual",
+        perfiles: "1 usuario",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png",
+        contenidoDestacado: [
+          "The Boys",
+          "Fallout",
+          "Invincible",
+          "Películas y series originales de Prime"
+        ]
+      },
+      {
+        nombre: "Paramount+",
+        tipo: "Pantalla",
+        precio: 3.50,
+        duracion: "1 mes",
+        detalles: "Pantalla individual",
+        perfiles: "1 usuario",
+        logo: "https://logospng.org/wp-content/uploads/paramount-plus.png",
+        contenidoDestacado: [
+          "Top Gun: Maverick",
+          "Bob Esponja",
+          "PAW Patrol",
+          "Series y películas de Paramount"
+        ]
+      },
+      {
+        nombre: "YouTube Premium",
+        tipo: "Pantalla",
+        precio: 3.60,
+        duracion: "1 mes",
+        detalles: "Cuenta YouTube Premium (1 usuario)",
+        perfiles: "1 usuario",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/e/ef/Youtube_logo.png",
+        contenidoDestacado: [
+          "Videos sin anuncios",
+          "Reproducción en segundo plano",
+          "YouTube Music incluido"
+        ]
+      },
+      {
+        nombre: "Max",
+        tipo: "Pantalla",
+        precio: 3.50,
+        duracion: "1 mes",
+        detalles: "Pantalla individual Max",
+        perfiles: "1 usuario",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/1/17/HBO_Max_Logo.svg",
+        contenidoDestacado: [
+          "Game of Thrones",
+          "The Last of Us",
+          "House of the Dragon",
+          "Películas y series de HBO"
+        ]
+      },
+      {
+        nombre: "Crunchyroll",
+        tipo: "Pantalla",
+        precio: 2.90,
+        duracion: "1 mes",
+        detalles: "Pantalla individual",
+        perfiles: "1 usuario",
+        logo: "https://www.pngmart.com/files/13/Luffy-Download-PNG-Image.png",
+        contenidoDestacado: [
+          "One Piece",
+          "Jujutsu Kaisen",
+          "Attack on Titan",
+          "Demon Slayer"
+        ]
+      },
+      {
+        nombre: "Plex",
+        tipo: "Pantalla",
+        precio: 3.40,
+        duracion: "1 mes",
+        detalles: "Pantalla individual",
+        perfiles: "1 usuario",
+        logo: "https://www.clipartmax.com/png/middle/23-230416_western-digital-mycloud-ex4100-0-tb-3-5.png",
+        contenidoDestacado: [
+          "Tu propia biblioteca multimedia",
+          "Películas gratis con anuncios",
+          "Series y canales en vivo"
+        ]
+      },
+      {
+        nombre: "IPTV",
+        tipo: "Pantalla",
+        precio: 3.80,
+        duracion: "1 mes",
+        detalles: "Pantalla individual IPTV",
+        perfiles: "1 usuario",
+        logo: "https://image.pngaaa.com/5/4230005-middle.png",
+        contenidoDestacado: [
+          "Fútbol en vivo",
+          "Ligas internacionales",
+          "Canales latinos y deportes"
+        ]
+      },
+      {
+        nombre: "ViX",
+        tipo: "Pantalla",
+        precio: 2.90,
+        duracion: "1 mes",
+        detalles: "Pantalla individual ViX",
+        perfiles: "1 usuario",
+        logo: "https://pnggallery.com/wp-content/uploads/vix-logo-01.png",
+        contenidoDestacado: [
+          "Novelas y series latinas",
+          "Programas en español",
+          "Deportes y noticias"
+        ]
+      },
+      {
+        nombre: "Canva Pro",
+        tipo: "Pantalla",
+        precio: 3.60,
+        duracion: "1 mes",
+        detalles: "Acceso Canva Pro (1 usuario)",
+        perfiles: "1 usuario",
+        logo: "https://www.pngall.com/wp-content/uploads/13/Canva-Logo-PNG.png",
+        contenidoDestacado: [
+          "Diseños para redes sociales",
+          "Miniaturas para YouTube",
+          "Flyers, logos y presentaciones"
+        ]
+      },
+
+      // CUENTAS COMPLETAS
+      {
+        nombre: "Netflix",
+        tipo: "Cuenta completa",
+        precio: 11.00,
+        duracion: "1 mes",
+        detalles: "Cuenta completa con 5 perfiles",
+        perfiles: "Hasta 5 perfiles",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/0/08/Netflix_2015_logo.svg",
+        contenidoDestacado: [
+          "Stranger Things",
+          "El juego del calamar",
+          "Wednesday",
+          "La casa de papel"
+        ]
+      },
+      {
+        nombre: "Amazon Prime Video",
+        tipo: "Cuenta completa",
+        precio: 5.50,
+        duracion: "1 mes",
+        detalles: "Cuenta completa Prime (hasta 6 perfiles)",
+        perfiles: "Hasta 6 perfiles",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/f/f1/Prime_Video.png",
+        contenidoDestacado: [
+          "The Boys",
+          "Fallout",
+          "Invincible",
+          "Jack Ryan"
+        ]
+      },
+      {
+        nombre: "Max",
+        tipo: "Cuenta completa",
+        precio: 5.00,
+        duracion: "1 mes",
+        detalles: "Cuenta completa Max con 5 perfiles",
+        perfiles: "Hasta 5 perfiles",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/1/17/HBO_Max_Logo.svg",
+        contenidoDestacado: [
+          "Game of Thrones",
+          "House of the Dragon",
+          "The Last of Us",
+          "Películas de Warner y DC"
+        ]
+      },
+      {
+        nombre: "Disney+ Estándar",
+        tipo: "Cuenta completa",
+        precio: 5.50,
+        duracion: "1 mes",
+        detalles: "Disney+ estándar con 5 perfiles",
+        perfiles: "Hasta 5 perfiles",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg",
+        contenidoDestacado: [
+          "Marvel",
+          "Star Wars",
+          "Pixar",
+          "Clásicos de Disney"
+        ]
+      },
+      {
+        nombre: "Disney+ Premium",
+        tipo: "Cuenta completa",
+        precio: 7.30,
+        duracion: "1 mes",
+        detalles: "Disney+ premium con 6 perfiles",
+        perfiles: "Hasta 6 perfiles",
+        logo: "https://upload.wikimedia.org/wikipedia/commons/3/3e/Disney%2B_logo.svg",
+        contenidoDestacado: [
+          "Loki",
+          "The Mandalorian",
+          "Películas en mejor calidad",
+          "Todo el catálogo Disney+"
+        ]
+      },
+      {
+        nombre: "ViX",
+        tipo: "Cuenta completa",
+        precio: 3.50,
+        duracion: "1 mes",
+        detalles: "Cuenta completa ViX con 5 perfiles",
+        perfiles: "Hasta 5 perfiles",
+        logo: "https://pnggallery.com/wp-content/uploads/vix-logo-01.png",
+        contenidoDestacado: [
+          "Novelas, realities y programas en español",
+          "Deportes latinos",
+          "Noticias y canales latinos"
+        ]
+      },
+      {
+        nombre: "Crunchyroll",
+        tipo: "Cuenta completa",
+        precio: 6.00,
+        duracion: "1 mes",
+        detalles: "Cuenta completa Crunchyroll",
+        perfiles: "Hasta 5 perfiles",
+        logo: "https://www.pngmart.com/files/13/Luffy-Download-PNG-Image.png",
+        contenidoDestacado: [
+          "One Piece",
+          "Jujutsu Kaisen",
+          "Attack on Titan",
+          "My Hero Academia"
+        ]
+      },
+      {
+        nombre: "Paramount+",
+        tipo: "Cuenta completa",
+        precio: 5.00,
+        duracion: "1 mes",
+        detalles: "Cuenta completa Paramount+",
+        perfiles: "Hasta 6 perfiles",
+        logo: "https://logospng.org/wp-content/uploads/paramount-plus.png",
+        contenidoDestacado: [
+          "Top Gun: Maverick",
+          "Bob Esponja",
+          "PAW Patrol",
+          "Series y películas clásicas de Paramount"
+        ]
+      },
+      {
+        nombre: "IPTV",
+        tipo: "Cuenta completa",
+        precio: 6.00,
+        duracion: "1 mes",
+        detalles: "Cuenta completa IPTV",
+        perfiles: "Hasta 4 dispositivos",
+        logo: "https://image.pngaaa.com/5/4230005-middle.png",
+        contenidoDestacado: [
+          "Fútbol en vivo (ligas y copas)",
+          "Canales internacionales",
+          "Deportes, películas y noticias"
+        ]
+      },
+      {
+        nombre: "Plex",
+        tipo: "Cuenta completa",
+        precio: 4.90,
+        duracion: "1 mes",
+        detalles: "Cuenta completa Plex",
+        perfiles: "Hasta 4 dispositivos",
+        logo: "https://www.clipartmax.com/png/middle/23-230416_western-digital-mycloud-ex4100-0-tb-3-5.png",
+        contenidoDestacado: [
+          "Tu propio servidor multimedia",
+          "Películas y series gratis con anuncios",
+          "Canales de TV en vivo"
+        ]
+      }
+    ];
+
+    const catalogoDiv = document.getElementById("catalogo");
+    const searchInput = document.getElementById("searchInput");
+    const filterTipo = document.getElementById("filterTipo");
+    const noResultsDiv = document.getElementById("noResults");
+
+    const modalOverlay = document.getElementById("modalOverlay");
+    const modalClose = document.getElementById("modalClose");
+    const modalLogo = document.getElementById("modalLogo");
+    const modalName = document.getElementById("modalName");
+    const modalType = document.getElementById("modalType");
+    const modalPrice = document.getElementById("modalPrice");
+    const modalDetails = document.getElementById("modalDetails");
+    const modalList = document.getElementById("modalList");
+    const modalWA = document.getElementById("modalWA");
+
+    function openModal(p) {
+      modalLogo.src = p.logo || "";
+      modalName.textContent = p.nombre;
+      modalType.textContent =
+        p.tipo === "Pantalla"
+          ? "Pantalla individual (1 usuario)"
+          : "Cuenta completa (multiusuario)";
+      modalPrice.textContent = `$${p.precio.toFixed(2)} USD · ${p.duracion}`;
+      modalDetails.textContent = `${p.detalles} · ${p.perfiles}`;
+
+      modalList.innerHTML = "";
+      if (p.contenidoDestacado && p.contenidoDestacado.length) {
+        p.contenidoDestacado.forEach((item) => {
+          const li = document.createElement("li");
+          li.textContent = item;
+          modalList.appendChild(li);
+        });
+      } else {
+        const li = document.createElement("li");
+        li.textContent =
+          "Próximamente añadiremos recomendaciones para esta plataforma.";
+        modalList.appendChild(li);
+      }
+
+      modalWA.onclick = () => {
+        const mensaje = `Hola 👋, quiero adquirir una ${p.tipo.toLowerCase()} de ${p.nombre} (${p.detalles}) por $${p.precio.toFixed(
+          2
+        )} USD.`;
+        const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+          mensaje
+        )}`;
+        window.open(url, "_blank");
+      };
+
+      modalOverlay.style.display = "flex";
+    }
+
+    function closeModal() {
+      modalOverlay.style.display = "none";
+    }
+
+    modalClose.addEventListener("click", closeModal);
+    modalOverlay.addEventListener("click", (e) => {
+      if (e.target === modalOverlay) closeModal();
+    });
+
+    function renderCatalogo(lista) {
+      catalogoDiv.innerHTML = "";
+
+      if (!lista.length) {
+        noResultsDiv.style.display = "block";
+        return;
+      } else {
+        noResultsDiv.style.display = "none";
+      }
+
+      lista.forEach((p) => {
+        const card = document.createElement("article");
+        card.className = "card";
+
+        const badgeClass =
+          p.tipo === "Pantalla" ? "badge-pantalla" : "badge-cuenta";
+        const badgeText =
+          p.tipo === "Pantalla"
+            ? "Pantalla individual"
+            : "Cuenta completa (multiusuario)";
+
+        card.innerHTML = `
+          <div>
+            <div class="logo-wrapper">
+              <img src="${p.logo}" alt="${p.nombre}" class="logo" />
+            </div>
+            <div class="badge-tipo ${badgeClass}">
+              ${badgeText}
+            </div>
+            <h2 class="name">${p.nombre}</h2>
+            <p class="details-line">${p.detalles}</p>
+            <p class="price">$${p.precio.toFixed(2)} USD</p>
+            <p class="subinfo">${p.duracion} · ${p.perfiles}</p>
+            <div class="card-buttons">
+              <button class="btn btn-whatsapp">
+                <span>📲</span>
+                <span>Solicitar por WhatsApp</span>
+              </button>
+              <button class="btn btn-info">
+                ℹ Ver información rápida
+              </button>
+            </div>
+          </div>
+        `;
+
+        // Fallback si el logo no carga
+        const img = card.querySelector(".logo");
+        img.addEventListener("error", () => {
+          const fallbackDiv = document.createElement("div");
+          fallbackDiv.className = "logo-fallback";
+          fallbackDiv.textContent = p.nombre.charAt(0);
+          img.replaceWith(fallbackDiv);
+        });
+
+        const btnWhatsApp = card.querySelector(".btn-whatsapp");
+        btnWhatsApp.addEventListener("click", () => {
+          let mensaje = `Hola 👋, quiero adquirir una ${p.tipo.toLowerCase()} de ${p.nombre} (${p.detalles}) por $${p.precio.toFixed(
+            2
+          )} USD.`;
+          const url = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+            mensaje
+          )}`;
+          window.open(url, "_blank");
+        });
+
+        const btnInfo = card.querySelector(".btn-info");
+        btnInfo.addEventListener("click", () => openModal(p));
+
+        catalogoDiv.appendChild(card);
+      });
+    }
+
+    function filtrar() {
+      const texto = searchInput.value.toLowerCase().trim();
+      const tipo = filterTipo.value;
+
+      const filtrado = plataformas.filter((p) => {
+        const coincideNombre = p.nombre.toLowerCase().includes(texto);
+        const coincideTipo = tipo === "todos" ? true : p.tipo === tipo;
+        return coincideNombre && coincideTipo;
+      });
+
+      renderCatalogo(filtrado);
+    }
+
+    searchInput.addEventListener("input", filtrar);
+    filterTipo.addEventListener("change", filtrar);
+
+    // Render inicial
+    renderCatalogo(plataformas);
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
